@@ -45,8 +45,11 @@ pub struct FileHeader {
     /// Creation timestamp (Unix epoch nanoseconds)
     pub created_at: u64,
 
+    /// Final chain state (request chain hash after last interaction)
+    pub final_chain_state: [u8; 32],
+
     /// Reserved for future use
-    pub reserved: [u8; 48],
+    pub reserved: [u8; 16],
 }
 
 static_assertions::const_assert_eq!(std::mem::size_of::<FileHeader>(), HEADER_SIZE);
@@ -145,7 +148,8 @@ impl Default for FileHeader {
             data_offset: (HEADER_SIZE + INDEX_ENTRY_SIZE * CHAIN_DEPTH_MAX as usize) as u64,
             file_size: 0,
             created_at: 0,
-            reserved: [0; 48],
+            final_chain_state: [0; 32],
+            reserved: [0; 16],
         }
     }
 }

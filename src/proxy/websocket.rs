@@ -278,7 +278,7 @@ impl WebSocketProxy {
                 Message::Text(_) => Ok(Message::Text(
                     String::from_utf8_lossy(&cached.body).to_string(),
                 )),
-                Message::Binary(_) | _ => Ok(Message::Binary(cached.body)),
+                _ => Ok(Message::Binary(cached.body)),
             }
         } else {
             Err(OuliError::Other(

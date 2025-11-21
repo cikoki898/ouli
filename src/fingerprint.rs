@@ -92,7 +92,7 @@ fn normalize_path(path: &str) -> String {
 }
 
 /// Request chain tracker
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct RequestChain {
     current_hash: [u8; 32],
 }
@@ -106,6 +106,12 @@ impl RequestChain {
         }
     }
 
+    /// Create a chain from a stored hash
+    #[must_use]
+    pub fn from_hash(hash: [u8; 32]) -> Self {
+        Self { current_hash: hash }
+    }
+
     /// Process a request and return its hash
     pub fn process_request(&mut self, request: &Request) -> [u8; 32] {
         let hash = fingerprint_request(request, self.current_hash);
@@ -116,6 +122,12 @@ impl RequestChain {
     /// Get the current (previous) hash
     #[must_use]
     pub fn previous_hash(&self) -> [u8; 32] {
+        self.current_hash
+    }
+
+    /// Get the current hash (for serialization)
+    #[must_use]
+    pub fn current_hash(&self) -> [u8; 32] {
         self.current_hash
     }
 

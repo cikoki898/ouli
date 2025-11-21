@@ -72,6 +72,12 @@ impl RecordingReader {
         self.header.recording_id
     }
 
+    /// Get the final chain state
+    #[must_use]
+    pub fn final_chain_state(&self) -> [u8; 32] {
+        self.header.final_chain_state
+    }
+
     /// Lookup an interaction by request hash
     #[must_use]
     pub fn lookup(&self, request_hash: [u8; 32]) -> Option<InteractionEntry> {
@@ -172,7 +178,9 @@ mod tests {
                 .append_interaction(request_hash, prev_hash, request_data, response_data)
                 .unwrap();
 
-            writer.finalize().unwrap();
+            writer
+                .finalize(crate::fingerprint::CHAIN_HEAD_HASH)
+                .unwrap();
         }
 
         // Read
@@ -216,7 +224,9 @@ mod tests {
                     .unwrap();
             }
 
-            writer.finalize().unwrap();
+            writer
+                .finalize(crate::fingerprint::CHAIN_HEAD_HASH)
+                .unwrap();
         }
 
         // Read all

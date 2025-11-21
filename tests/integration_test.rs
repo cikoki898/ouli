@@ -4,7 +4,7 @@ use std::sync::Arc;
 use tempfile::TempDir;
 
 use ouli::config::{Config, EndpointConfig, LimitsConfig, Mode, RedactionConfig};
-use ouli::fingerprint::Request;
+use ouli::fingerprint::{Request, CHAIN_HEAD_HASH};
 use ouli::proxy::HttpProxy;
 use ouli::recording::{RecordingEngine, Response};
 use ouli::replay::{ReplayEngine, WarmingStrategy};
@@ -27,13 +27,9 @@ fn create_test_config(mode: Mode, recording_dir: std::path::PathBuf) -> Config {
     }
 }
 
-// TODO: End-to-end record-replay test currently disabled
-// Issue: Fingerprint matching between record and replay phases
-// The recording engine and replay engine need to share chain state
-// for sequential requests to have matching fingerprints.
-// This will be fixed in a follow-up task.
+// NOTE: This test makes real HTTP requests
 #[tokio::test]
-#[ignore]
+#[ignore = "makes real HTTP requests"]
 async fn test_record_and_replay_single_request() {
     let temp_dir = TempDir::new().unwrap();
 
@@ -141,9 +137,7 @@ async fn test_recording_engine_direct() {
     assert_eq!(engine.session_count(), 0);
 }
 
-// TODO: Direct replay test currently disabled - same chain state issue
 #[tokio::test]
-#[ignore]
 async fn test_replay_engine_direct() {
     let temp_dir = TempDir::new().unwrap();
 
@@ -180,7 +174,7 @@ async fn test_replay_engine_direct() {
         // Warm cache
         engine.warm().unwrap();
 
-        // Replay the request
+        // Replay the request (use CHAIN_HEAD_HASH as prev_hash for first request)
         let response = engine
             .replay_request(
                 "GET".to_string(),
@@ -188,7 +182,7 @@ async fn test_replay_engine_direct() {
                 vec![("key".to_string(), "value".to_string())],
                 vec![("Accept".to_string(), "application/json".to_string())],
                 vec![],
-                [0u8; 32],
+                CHAIN_HEAD_HASH,
             )
             .unwrap();
 

@@ -141,19 +141,27 @@ impl RecordingWriter {
         Ok(())
     }
 
-    /// Finalize the recording
+    /// Finalize the recording file
     ///
     /// # Errors
     ///
     /// Returns error if flush fails
-    pub fn finalize(mut self) -> Result<()> {
+    pub fn finalize(mut self, final_chain_state: [u8; 32]) -> Result<()> {
+        // Store final chain state
+        self.header.final_chain_state = final_chain_state;
+
+        // Write header first (with CRC as 0)
+        self.header.header_crc = 0;
+        let header_bytes = bytes_of(&self.header);
+        self.mmap[..super::HEADER_SIZE].copy_from_slice(header_bytes);
+
         // Calculate header CRC (exclude CRC field at bytes 12-15)
         let mut hasher = Hasher::new();
         hasher.update(&self.mmap[..12]); // magic + version
         hasher.update(&self.mmap[16..super::HEADER_SIZE]); // rest of header after CRC
         self.header.header_crc = hasher.finalize();
 
-        // Write final header
+        // Write final header with CRC
         let header_bytes = bytes_of(&self.header);
         self.mmap[..super::HEADER_SIZE].copy_from_slice(header_bytes);
 
@@ -215,7 +223,9 @@ mod tests {
             .append_interaction(request_hash, prev_hash, b"request", b"response")
             .unwrap();
 
-        writer.finalize().unwrap();
+        writer
+            .finalize(crate::fingerprint::CHAIN_HEAD_HASH)
+            .unwrap();
 
         // File should exist and be readable
         assert!(file.path().exists());

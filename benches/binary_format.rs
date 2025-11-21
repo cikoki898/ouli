@@ -25,7 +25,7 @@ fn bench_write_performance(c: &mut Criterion) {
                     .unwrap();
             }
 
-            writer.finalize().unwrap();
+            writer.finalize(ouli::fingerprint::CHAIN_HEAD_HASH).unwrap();
         });
     });
 }
@@ -49,7 +49,7 @@ fn bench_read_performance(c: &mut Criterion) {
                 )
                 .unwrap();
         }
-        writer.finalize().unwrap();
+        writer.finalize(ouli::fingerprint::CHAIN_HEAD_HASH).unwrap();
     }
 
     c.bench_function("lookup_interaction", |b| {

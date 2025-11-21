@@ -169,8 +169,14 @@ impl RecordingSession {
     pub async fn finalize(&self) -> Result<()> {
         let mut writer_guard = self.writer.lock().await;
 
+        // Get final chain state
+        let final_chain_state = {
+            let chain = self.chain.lock().await;
+            chain.current_hash()
+        };
+
         if let Some(writer) = writer_guard.take() {
-            writer.finalize()?;
+            writer.finalize(final_chain_state)?;
         }
 
         Ok(())
