@@ -22,6 +22,7 @@ toml = "0.8"
 # Cryptography
 sha2 = "0.10"
 crc32fast = "1.4"
+hex = "0.4"
 
 # Memory mapping
 memmap2 = "0.9"

@@ -17,6 +17,7 @@ pub mod config;
 pub mod error;
 pub mod fingerprint;
 pub mod network;
+pub mod recording;
 pub mod storage;
 
 pub use error::{OuliError, Result};
