@@ -60,3 +60,8 @@ secrets/
 *.temp
 /tmp/
 .cache/
+
+
+# Added by cargo
+
+/target
