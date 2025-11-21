@@ -1,8 +1,10 @@
 //! Proxy integration for recording and replay
 
 mod http;
+mod websocket;
 
 pub use http::HttpProxy;
+pub use websocket::WebSocketProxy;
 
 use crate::config::Mode;
 

@@ -267,7 +267,7 @@ mod tests {
 
     // NOTE: This test now makes real HTTP requests and should be an integration test
     #[tokio::test]
-    #[ignore]
+    #[ignore = "makes real HTTP requests"]
     async fn test_handle_request_record_mode() {
         let temp_dir = TempDir::new().unwrap();
         let config = Arc::new(create_test_config(Mode::Record, &temp_dir));

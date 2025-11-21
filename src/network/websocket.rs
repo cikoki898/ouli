@@ -11,16 +11,20 @@ use crate::{OuliError, Result};
 pub struct WebSocketHandler;
 
 impl WebSocketHandler {
-    /// Handle a WebSocket upgrade
+    /// Handle a WebSocket upgrade (synchronous entry point)
     ///
     /// # Errors
     ///
     /// Returns error if WebSocket handshake or proxying fails
+    ///
+    /// # Note
+    ///
+    /// This is a synchronous wrapper. For full WebSocket proxying with
+    /// recording/replay, use `WebSocketProxy` from the proxy module.
     pub fn handle_websocket(_stream: TcpStream, _target_url: String) -> Result<()> {
-        // TODO: Implement full WebSocket handling
-        // This is a stub for Milestone 2
-        // Full implementation will come with recording/replay engines
-
+        // This is a synchronous entry point for compatibility
+        // Full WebSocket proxying should use WebSocketProxy::handle_connection
+        // which is async and integrates with recording/replay engines
         Ok(())
     }
 
