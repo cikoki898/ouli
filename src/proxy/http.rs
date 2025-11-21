@@ -77,7 +77,7 @@ impl HttpProxy {
         debug!("Record mode: {} {}", method, path);
 
         // TODO: Forward request to target endpoint
-        // For Milestone 5, return a mock response
+        // For Milestone 6, return a mock response
         let response = RecordResponse {
             status: 200,
             headers: vec![("Content-Type".to_string(), "text/plain".to_string())],
@@ -93,7 +93,7 @@ impl HttpProxy {
             body,
         };
 
-        // Record the interaction
+        // Record the interaction (engine handles chain tracking)
         if let Some(ref engine) = self.recording_engine {
             engine
                 .record_interaction(None, request, response.clone())
@@ -114,10 +114,21 @@ impl HttpProxy {
     ) -> Result<RecordResponse> {
         debug!("Replay mode: {} {}", method, path);
 
-        // Get previous hash from chain
+        // Build request for fingerprinting
+        let request = fingerprint::Request {
+            method: method.clone(),
+            path: path.clone(),
+            query: query.clone(),
+            headers: headers.clone(),
+            body: body.clone(),
+        };
+
+        // Get previous hash and update chain
         let prev_hash = {
-            let chain = self.request_chain.read().await;
-            chain.previous_hash()
+            let mut chain = self.request_chain.write().await;
+            let prev = chain.previous_hash();
+            chain.process_request(&request);
+            prev
         };
 
         // Try to replay from cache
