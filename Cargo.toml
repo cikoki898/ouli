@@ -36,6 +36,22 @@ dashmap = "5.5"
 # Static assertions
 static_assertions = "1.1"
 
+# Async runtime
+tokio = { version = "1.40", features = ["rt-multi-thread", "net", "time", "sync", "macros", "signal"] }
+
+# HTTP
+hyper = { version = "1.5", features = ["server", "client", "http1", "http2"] }
+hyper-util = { version = "0.1", features = ["tokio", "server", "client-legacy"] }
+http-body-util = "0.1"
+
+# WebSocket
+tokio-tungstenite = "0.24"
+futures-util = "0.3"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
 [dev-dependencies]
 tempfile = "3.8"
 proptest = "1.4"
