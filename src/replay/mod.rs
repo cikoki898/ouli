@@ -4,7 +4,7 @@ mod cache;
 mod engine;
 
 pub use cache::ReplayCache;
-pub use engine::ReplayEngine;
+pub use engine::{CacheStats, ReplayEngine};
 
 /// Cache warming strategy
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

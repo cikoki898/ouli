@@ -12,6 +12,7 @@ use super::session::SessionManager;
 use super::DEFAULT_SESSION;
 
 /// HTTP response for recording
+#[derive(Clone)]
 pub struct Response {
     /// HTTP status code
     pub status: u16,

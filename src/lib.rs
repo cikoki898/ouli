@@ -17,6 +17,7 @@ pub mod config;
 pub mod error;
 pub mod fingerprint;
 pub mod network;
+pub mod proxy;
 pub mod recording;
 pub mod replay;
 pub mod storage;
