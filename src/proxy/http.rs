@@ -7,6 +7,7 @@ use tracing::{debug, info, warn};
 
 use crate::config::{Config, Mode};
 use crate::fingerprint::{self, RequestChain};
+use crate::network::HttpClient;
 use crate::recording::{RecordingEngine, Response as RecordResponse};
 use crate::replay::ReplayEngine;
 use crate::{OuliError, Result};
@@ -17,6 +18,7 @@ pub struct HttpProxy {
     recording_engine: Option<Arc<RecordingEngine>>,
     replay_engine: Option<Arc<ReplayEngine>>,
     request_chain: Arc<RwLock<RequestChain>>,
+    http_client: HttpClient,
 }
 
 impl HttpProxy {
@@ -43,6 +45,7 @@ impl HttpProxy {
             recording_engine,
             replay_engine,
             request_chain: Arc::new(RwLock::new(RequestChain::new())),
+            http_client: HttpClient::new(),
         }
     }
 
@@ -76,12 +79,30 @@ impl HttpProxy {
     ) -> Result<RecordResponse> {
         debug!("Record mode: {} {}", method, path);
 
-        // TODO: Forward request to target endpoint
-        // For Milestone 6, return a mock response
+        // Get target endpoint configuration
+        let endpoint =
+            self.config.endpoints.first().ok_or_else(|| {
+                OuliError::ConfigError("No target endpoint configured".to_string())
+            })?;
+
+        // Forward request to target endpoint
+        let forward_request = crate::network::ForwardRequest {
+            method: &method,
+            target_host: &endpoint.target_host,
+            target_port: endpoint.target_port,
+            path: &path,
+            query: &query,
+            headers: &headers,
+            body: &body,
+        };
+
+        let forwarded_response = self.http_client.forward_request(&forward_request).await?;
+
+        // Convert to RecordResponse
         let response = RecordResponse {
-            status: 200,
-            headers: vec![("Content-Type".to_string(), "text/plain".to_string())],
-            body: b"Mock response from record mode".to_vec(),
+            status: forwarded_response.status,
+            headers: forwarded_response.headers,
+            body: forwarded_response.body,
         };
 
         // Build request for recording
@@ -244,7 +265,9 @@ mod tests {
         assert!(proxy.replay_engine.is_some());
     }
 
+    // NOTE: This test now makes real HTTP requests and should be an integration test
     #[tokio::test]
+    #[ignore]
     async fn test_handle_request_record_mode() {
         let temp_dir = TempDir::new().unwrap();
         let config = Arc::new(create_test_config(Mode::Record, &temp_dir));

@@ -42,7 +42,7 @@ tokio = { version = "1.40", features = ["rt-multi-thread", "net", "time", "sync"
 
 # HTTP
 hyper = { version = "1.5", features = ["server", "client", "http1", "http2"] }
-hyper-util = { version = "0.1", features = ["tokio", "server", "client-legacy"] }
+hyper-util = { version = "0.1", features = ["tokio", "server", "client-legacy", "http1", "http2"] }
 http-body-util = "0.1"
 
 # WebSocket
@@ -52,6 +52,9 @@ futures-util = "0.3"
 # Logging
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# URL encoding
+urlencoding = "2.1"
 
 [dev-dependencies]
 tempfile = "3.8"

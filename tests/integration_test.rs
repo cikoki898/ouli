@@ -80,7 +80,10 @@ async fn test_record_and_replay_single_request() {
 
         // Check cache was populated
         let stats_before = proxy.cache_stats().unwrap();
-        assert!(stats_before.size > 0, "Cache should have entries after warming");
+        assert!(
+            stats_before.size > 0,
+            "Cache should have entries after warming"
+        );
 
         // Replay the request
         let response = proxy

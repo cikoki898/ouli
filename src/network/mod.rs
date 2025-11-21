@@ -1,12 +1,14 @@
 //! Network layer for Ouli
 //!
-//! Provides async HTTP/WebSocket handling with bounded concurrency.
+//! Provides async HTTP and WebSocket handling
 
-mod connection_pool;
-mod handler;
-mod http;
-mod websocket;
+pub mod client;
+pub mod connection_pool;
+pub mod handler;
+pub mod http;
+pub mod websocket;
 
+pub use client::{ForwardRequest, ForwardedResponse, HttpClient};
 pub use connection_pool::{ConnectionGuard, ConnectionPool};
 pub use handler::NetworkHandler;
 pub use http::HttpHandler;
