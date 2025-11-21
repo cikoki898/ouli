@@ -36,6 +36,25 @@ impl RecordingReader {
 
         let header: FileHeader = *from_bytes(&mmap[..super::HEADER_SIZE]);
 
+        // Verify magic bytes
+        if header.magic != super::FILE_MAGIC {
+            return Err(OuliError::InvalidFormat(format!(
+                "Invalid magic bytes: expected {:?}, got {:?}",
+                super::FILE_MAGIC,
+                header.magic
+            )));
+        }
+
+        // Check format version (support v1 and v2)
+        if header.version != super::FILE_VERSION && header.version != super::FILE_VERSION_V1 {
+            return Err(OuliError::InvalidFormat(format!(
+                "Unsupported format version: {} (supported: {} or {})",
+                header.version,
+                super::FILE_VERSION_V1,
+                super::FILE_VERSION
+            )));
+        }
+
         // Validate magic and version
         super::validate_header(&header)?;
 

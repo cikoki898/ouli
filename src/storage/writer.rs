@@ -111,7 +111,9 @@ impl RecordingWriter {
                 .as_nanos() as u64,
             request_size: request_data.len() as u32,
             response_size: response_data.len() as u32,
-            reserved: [0; 32],
+            request_compressed_size: 0, // TODO: Set if compression enabled
+            response_compressed_size: 0, // TODO: Set if compression enabled
+            reserved: [0; 24],
         };
 
         // Write index entry

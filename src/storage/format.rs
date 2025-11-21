@@ -5,8 +5,12 @@ use bytemuck::{Pod, Zeroable};
 /// File magic bytes: "OULI\x00\x01\x00\x00"
 pub const FILE_MAGIC: [u8; 8] = [0x4F, 0x55, 0x4C, 0x49, 0x00, 0x01, 0x00, 0x00];
 
-/// Current format version
-pub const FILE_VERSION: u32 = 1;
+/// Current format version (major.minor encoded as u32)
+/// Version 2.0 adds compression and feature flags
+pub const FILE_VERSION: u32 = 2;
+
+/// Format version 1 (legacy)
+pub const FILE_VERSION_V1: u32 = 1;
 
 /// File header size (cache-aligned to 128 bytes)
 pub const HEADER_SIZE: usize = 128;
@@ -16,6 +20,32 @@ pub const INDEX_ENTRY_SIZE: usize = 128;
 
 /// Maximum chain depth
 pub const CHAIN_DEPTH_MAX: u64 = 65_536;
+
+/// Feature flags for format capabilities
+#[derive(Debug, Clone, Copy)]
+#[repr(u32)]
+pub enum FeatureFlags {
+    /// No special features
+    None = 0,
+    /// Data compression enabled
+    Compression = 1 << 0,
+    /// Checksums on all data blocks
+    Checksums = 1 << 1,
+    /// Extended metadata section
+    ExtendedMetadata = 1 << 2,
+}
+
+/// Compression algorithm
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
+pub enum CompressionType {
+    /// No compression
+    None = 0,
+    /// LZ4 compression (fast)
+    Lz4 = 1,
+    /// Zstd compression (balanced)
+    Zstd = 2,
+}
 
 /// File header (128 bytes, cache-aligned)
 #[derive(Debug, Clone, Copy, Pod, Zeroable)]
@@ -48,8 +78,17 @@ pub struct FileHeader {
     /// Final chain state (request chain hash after last interaction)
     pub final_chain_state: [u8; 32],
 
+    /// Feature flags (bitfield)
+    pub feature_flags: u32,
+
+    /// Compression algorithm used
+    pub compression_type: u8,
+
+    /// Compression level (0-9, algorithm-specific)
+    pub compression_level: u8,
+
     /// Reserved for future use
-    pub reserved: [u8; 16],
+    pub reserved: [u8; 10],
 }
 
 static_assertions::const_assert_eq!(std::mem::size_of::<FileHeader>(), HEADER_SIZE);
@@ -80,8 +119,14 @@ pub struct InteractionEntry {
     /// Response data size
     pub response_size: u32,
 
+    /// Compressed request size (0 if not compressed)
+    pub request_compressed_size: u32,
+
+    /// Compressed response size (0 if not compressed)
+    pub response_compressed_size: u32,
+
     /// Reserved for future use
-    pub reserved: [u8; 32],
+    pub reserved: [u8; 24],
 }
 
 static_assertions::const_assert_eq!(std::mem::size_of::<InteractionEntry>(), INDEX_ENTRY_SIZE);
@@ -149,7 +194,42 @@ impl Default for FileHeader {
             file_size: 0,
             created_at: 0,
             final_chain_state: [0; 32],
-            reserved: [0; 16],
+            feature_flags: 0,    // No features by default
+            compression_type: 0, // No compression by default
+            compression_level: 0,
+            reserved: [0; 10],
+        }
+    }
+}
+
+impl FileHeader {
+    /// Check if a feature flag is enabled
+    #[must_use]
+    pub fn has_feature(&self, flag: FeatureFlags) -> bool {
+        (self.feature_flags & (flag as u32)) != 0
+    }
+
+    /// Enable a feature flag
+    pub fn enable_feature(&mut self, flag: FeatureFlags) {
+        self.feature_flags |= flag as u32;
+    }
+
+    /// Get compression type
+    #[must_use]
+    pub fn compression(&self) -> CompressionType {
+        match self.compression_type {
+            1 => CompressionType::Lz4,
+            2 => CompressionType::Zstd,
+            _ => CompressionType::None,
+        }
+    }
+
+    /// Set compression
+    pub fn set_compression(&mut self, compression: CompressionType, level: u8) {
+        self.compression_type = compression as u8;
+        self.compression_level = level;
+        if compression != CompressionType::None {
+            self.enable_feature(FeatureFlags::Compression);
         }
     }
 }
@@ -176,5 +256,46 @@ mod tests {
         assert_eq!(header.magic, FILE_MAGIC);
         assert_eq!(header.version, FILE_VERSION);
         assert_eq!(header.interaction_count, 0);
+        assert_eq!(header.feature_flags, 0);
+        assert_eq!(header.compression_type, 0);
+    }
+
+    #[test]
+    fn test_feature_flags() {
+        let mut header = FileHeader::default();
+
+        // Initially no features
+        assert!(!header.has_feature(FeatureFlags::Compression));
+        assert!(!header.has_feature(FeatureFlags::Checksums));
+
+        // Enable compression
+        header.enable_feature(FeatureFlags::Compression);
+        assert!(header.has_feature(FeatureFlags::Compression));
+        assert!(!header.has_feature(FeatureFlags::Checksums));
+
+        // Enable checksums
+        header.enable_feature(FeatureFlags::Checksums);
+        assert!(header.has_feature(FeatureFlags::Compression));
+        assert!(header.has_feature(FeatureFlags::Checksums));
+    }
+
+    #[test]
+    fn test_compression() {
+        let mut header = FileHeader::default();
+
+        // Default: no compression
+        assert_eq!(header.compression(), CompressionType::None);
+        assert!(!header.has_feature(FeatureFlags::Compression));
+
+        // Set LZ4 compression
+        header.set_compression(CompressionType::Lz4, 3);
+        assert_eq!(header.compression(), CompressionType::Lz4);
+        assert_eq!(header.compression_level, 3);
+        assert!(header.has_feature(FeatureFlags::Compression));
+
+        // Set Zstd compression
+        header.set_compression(CompressionType::Zstd, 6);
+        assert_eq!(header.compression(), CompressionType::Zstd);
+        assert_eq!(header.compression_level, 6);
     }
 }

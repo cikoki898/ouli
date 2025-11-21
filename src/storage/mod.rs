@@ -5,8 +5,8 @@ mod reader;
 mod writer;
 
 pub use format::{
-    FileHeader, InteractionEntry, RequestHeader, ResponseHeader, CHAIN_DEPTH_MAX, FILE_MAGIC,
-    FILE_VERSION, HEADER_SIZE, INDEX_ENTRY_SIZE,
+    CompressionType, FeatureFlags, FileHeader, InteractionEntry, RequestHeader, ResponseHeader,
+    CHAIN_DEPTH_MAX, FILE_MAGIC, FILE_VERSION, FILE_VERSION_V1, HEADER_SIZE, INDEX_ENTRY_SIZE,
 };
 pub use reader::RecordingReader;
 pub use writer::RecordingWriter;
@@ -26,10 +26,11 @@ pub fn validate_header(header: &FileHeader) -> Result<()> {
         )));
     }
 
-    if header.version != FILE_VERSION {
+    // Support both v1 and v2
+    if header.version != FILE_VERSION && header.version != FILE_VERSION_V1 {
         return Err(crate::OuliError::InvalidFormat(format!(
-            "Unsupported version: {}, expected {}",
-            header.version, FILE_VERSION
+            "Unsupported version: {} (supported: {} or {})",
+            header.version, FILE_VERSION_V1, FILE_VERSION
         )));
     }
 
