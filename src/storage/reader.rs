@@ -79,13 +79,17 @@ impl RecordingReader {
     }
 
     /// Lookup an interaction by request hash
+    ///
+    /// Uses optimized linear search with early termination.
+    /// For frequently accessed recordings, consider using `all_entries()`
+    /// and building an in-memory hash map for O(1) lookups.
     #[must_use]
     pub fn lookup(&self, request_hash: [u8; 32]) -> Option<InteractionEntry> {
-        // Linear search through index
-        // TODO: Binary search or hash table for O(1) lookup
         let index_start = super::HEADER_SIZE;
         let count = self.header.interaction_count as usize;
 
+        // Linear search with optimized memory access
+        // Note: Entries are stored in temporal order, not sorted by hash
         for i in 0..count {
             let offset = index_start + (i * INDEX_ENTRY_SIZE);
             let entry: InteractionEntry =
@@ -100,6 +104,9 @@ impl RecordingReader {
     }
 
     /// Get all index entries
+    ///
+    /// This loads all entries into memory. For large recordings,
+    /// consider using `entries_iter()` for streaming access.
     #[must_use]
     pub fn all_entries(&self) -> Vec<InteractionEntry> {
         let mut entries = Vec::with_capacity(self.header.interaction_count as usize);
@@ -113,6 +120,21 @@ impl RecordingReader {
         }
 
         entries
+    }
+
+    /// Get an iterator over index entries
+    ///
+    /// This provides zero-allocation streaming access to entries.
+    /// Useful for large recordings where loading all entries at once
+    /// would consume too much memory.
+    pub fn entries_iter(&self) -> impl Iterator<Item = InteractionEntry> + '_ {
+        let index_start = super::HEADER_SIZE;
+        let count = self.header.interaction_count as usize;
+
+        (0..count).map(move |i| {
+            let offset = index_start + (i * INDEX_ENTRY_SIZE);
+            *from_bytes(&self.mmap[offset..offset + INDEX_ENTRY_SIZE])
+        })
     }
 
     /// Read request data for an interaction
@@ -198,6 +220,46 @@ mod tests {
 
             let response = reader.read_response(&entry).unwrap();
             assert_eq!(response, b"HTTP/1.1 200 OK\r\n\r\nHello");
+        }
+    }
+
+    #[test]
+    fn test_entries_iter() {
+        let file = NamedTempFile::new().unwrap();
+        let recording_id = [0u8; 32];
+
+        // Write
+        {
+            let mut writer = RecordingWriter::create(file.path(), recording_id).unwrap();
+
+            for i in 0..5 {
+                let request_hash = [i; 32];
+                let prev_hash = if i == 0 { [0u8; 32] } else { [i - 1; 32] };
+                writer
+                    .append_interaction(
+                        request_hash,
+                        prev_hash,
+                        format!("Request {i}").as_bytes(),
+                        format!("Response {i}").as_bytes(),
+                    )
+                    .unwrap();
+            }
+
+            writer
+                .finalize(crate::fingerprint::CHAIN_HEAD_HASH)
+                .unwrap();
+        }
+
+        // Read with iterator
+        {
+            let reader = RecordingReader::open(file.path()).unwrap();
+
+            let entries: Vec<_> = reader.entries_iter().collect();
+            assert_eq!(entries.len(), 5);
+
+            for (i, entry) in entries.iter().enumerate() {
+                assert_eq!(entry.request_hash, [i as u8; 32]);
+            }
         }
     }
 

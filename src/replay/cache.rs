@@ -69,9 +69,9 @@ impl ReplayCache {
         let reader = RecordingReader::open(&file_path)?;
         let mut loaded_count = 0;
 
-        // Load all interactions from the recording
-        let entries = reader.all_entries();
-        for entry in entries {
+        // Stream interactions without allocating intermediate Vec
+        // This is more memory-efficient for large recordings
+        for entry in reader.entries_iter() {
             // Deserialize response
             if let Ok(response_data) = reader.read_response(&entry) {
                 if let Ok(response) = deserialize_response(response_data) {
